@@ -1,1 +1,168 @@
-<h1>Clean Architecture Todo App</h1>
+<h1>Clean Arhictecture Todo App</h1>
+
+<flexi-grid
+[data]="todos()"
+themeClass="light"
+[showIndex]="true"
+height="100%"
+[showCaption]="true"
+captionTitle="Todo List"
+[captionTemplate]="captionTemplate"
+[showRefreshData]="false"
+>
+    <ng-template #captionTemplate>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            Add
+        </button>
+    </ng-template>
+
+    <flexi-grid-column field="id" title="Id" ></flexi-grid-column>
+    <flexi-grid-column
+      field="work"
+      title="Work"
+      [columnTemplate]="workColumnTemplate"></flexi-grid-column>
+   <flexi-grid-column
+      field="DeadLine"
+      title="Dead Line"
+      filterType="date"
+      [columnTemplate]="deadLineColumnTemplate"></flexi-grid-column>
+    <flexi-grid-column
+      field="isCompleted"
+      title="Is Comp."
+      [columnTemplate]="isCompletedColumnTemplate"
+      textAlign="center"
+      width="110px"
+      >
+    </flexi-grid-column>
+    <flexi-grid-column
+      field="note"
+      title="Note"
+      [columnTemplate]="noteColumnTemplate"></flexi-grid-column>
+    <flexi-grid-column title="Operations" [columnTemplate]="operataionsColumnTemplate">
+    </flexi-grid-column>
+
+    <ng-template #workColumnTemplate let-item="item">
+        @if(item.isShowUpdateForm){
+            <input [(ngModel)]="item.work" class="form-control">
+        }@else {
+            <span>{{item.work}}</span>
+        }
+        
+    </ng-template>
+
+    <ng-template #deadLineColumnTemplate let-item="item">
+        @if(item.isShowUpdateForm){
+            <input type="date" [(ngModel)]="item.deadline" class="form-control">
+        }@else {
+            <span>{{item.deadline | date:'dd.MM.yyyy'}}</span>
+        }
+    </ng-template>
+
+    <ng-template #isCompletedColumnTemplate let-item="item">
+        <input
+          type="checkbox"
+          [(ngModel)]="item.isCompleted"
+          (change)="changeIsCompleted(item)">      
+    </ng-template>
+
+    <ng-template #noteColumnTemplate let-item="item">
+        @if(item.isShowUpdateForm){
+            <input [(ngModel)]="item.note" class="form-control">
+        }@else {
+            <span>{{item.note}}</span>
+        }
+    </ng-template>
+
+    <ng-template #operataionsColumnTemplate let-item="item">
+        @if(item.isShowUpdateForm){
+            <button class="btn btn-primary mx-1" (click)="updateWithForm(item)">Update</button>
+            <button class="btn btn-danger" (click)="cancel()">Cancel</button>
+        }@else {
+            @if(!isUpdateFormActive()){
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button class="btn btn-primary" (click)="getWithForm(item)">Update In Table</button>
+                <button
+                  class="btn btn-dark"
+                  (click)="get(item)"
+                  data-bs-toggle="modal"
+                  data-bs-target="#updateModal">
+                  Update In Modal
+                </button>
+                <button class="btn btn-danger" (click)="deleteById(item.id)">Delete</button>
+            </div>
+            }
+        }
+    </ng-template>
+</flexi-grid>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Add Todo</h1>
+          <button type="button" #addModalCloseBtn class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form #addForm="ngForm" (ngSubmit)="create()">
+            <div class="modal-body">
+                <!-- Work -->
+                <div class="form-group">
+                    <label>Work</label>
+                    <input type="text" [(ngModel)]="addModel().work" name="work" class="form-control">
+                </div>
+
+                <!-- Dead Line -->
+                <div class="form-group mt-1">
+                    <label>Dead Line</label>
+                    <input type="date" [(ngModel)]="addModel().deadline" name="deadLine" class="form-control">
+                </div>
+
+                <!-- Note -->
+                <div class="form-group mt-1">
+                    <label>Note</label>
+                    <input type="text" [(ngModel)]="addModel().note" name="note" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: right;">                
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+      </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">update Todo</h1>
+          <button type="button" #updateModalCloseBtn class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form #updateForm="ngForm" (ngSubmit)="update()">
+            <div class="modal-body">
+                <!-- Work -->
+                <div class="form-group">
+                    <label>Work</label>
+                    <input type="text" [(ngModel)]="updateModel().work" name="updateWork" class="form-control">
+                </div>
+
+                <!-- Dead Line -->
+                <div class="form-group mt-1">
+                    <label>Dead Line</label>
+                    <input type="date" [(ngModel)]="updateModel().deadline" name="updateDeadLine" class="form-control">
+                </div>
+
+                <!-- Note -->
+                <div class="form-group mt-1">
+                    <label>Note</label>
+                    <input type="text" [(ngModel)]="updateModel().note" name="updateNote" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: right;">                
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </form>
+      </div>
+    </div>
+</div>
